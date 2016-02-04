@@ -1,0 +1,45 @@
+
+redis:
+  volumes:
+    - "/data"
+  ports:
+    - "6379:6379"
+  expose:
+    - "6379"
+  image: redis:latest
+
+mysql:
+  environment:
+    MYSQL_ROOT_PASSWORD: gorkie
+    MYSQL_DATABASE: gorkdb
+    MYSQL_USER: gork
+    MYSQL_PASSWORD: password
+  volumes:
+    - "/var/lib/mysql"
+  ports:
+    - "3306:3306"
+  expose:
+    - "3306"
+  image: mysql:latest
+
+cosmo-app:
+  build:  cosmo-app
+  volumes:
+    - "./cosmo-app:/usr/src/app"
+  environment:
+    DATABASE_URL: mysql2://gork:password@172.17.42.1:3306/gorkdb
+    AWS_REGION: us-east-1
+  ports:
+    - "3000:3000"
+  links:
+    - mysql:mysql
+  command: bash -c "sleep 5; bundle install --local --deployment && RAILS_ENV=development bundle exec rake assets:precompile && bundle exec rake db:create db:migrate && bundle exec puma -t 1:4 -w 1 -p 3000 -e development --preload"
+
+
+nginx:
+  build:  ./nginx
+  volumes_from:
+    - "cosmo-app"
+  ports:
+    - "80:80"
+    - "443:443"
