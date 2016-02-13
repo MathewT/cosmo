@@ -41,10 +41,11 @@ cosmo-app:
   volumes:
     - "./cosmo-app:/usr/src/app"
   links:
-    - postgres:postgres
+    - mysql:mysql
     - redis:redis
   environment:
-    DATABASE_URL: postgres://cosmo:password@172.17.42.1:5432/cosmodb
+    DATABASE_URL: mysql2://gork:password@172.17.42.1:3306/gorkdb
+    ## DATABASE_URL: postgres://cosmo:password@172.17.42.1:5432/cosmodb
     AWS_REGION: us-east-1
   ports:
     - "3000:3000"
